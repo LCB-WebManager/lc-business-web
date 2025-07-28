@@ -4,76 +4,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LC Business Web Manager - المنتجات</title>
+  <title>LC Business Web Manager - صفقة تصدير</title>
   <style>
     body { font-family: sans-serif; padding: 2rem; direction: rtl; }
-    input, select, button { margin-bottom: 1rem; display: block; width: 100%; padding: 0.5rem; }
+    input, button { margin-bottom: 1rem; display: block; width: 100%; padding: 0.5rem; }
     .result { font-weight: bold; margin-top: 1rem; color: green; }
   </style>
 </head>
 <body>
-  <h1>LC Business Web Manager</h1>
-  <h2>📦 إضافة منتج</h2>
+  <h1>🧾 صفقة تصدير - LC Business</h1>
 
-  <label>اسم المنتج</label>
-  <input type="text" id="productName" />
-
-  <label>العلامة التجارية</label>
-  <input type="text" id="brand" />
-
-  <label>الوزن (غرام)</label>
-  <input type="number" id="weight" />
-
-  <label>الحجم (سم³)</label>
-  <input type="number" id="volume" />
-
-  <button onclick="addProduct()">➕ أضف المنتج</button>
-
-  <h2>📝 إدخال صفقة</h2>
-  <label>اختر المنتج</label>
-  <select id="productList"></select>
-
-  <label>الكمية</label>
+  <label>الكمية (وحدة)</label>
   <input type="number" id="quantity" />
 
-  <button onclick="calculateVolume()">📦 حساب الحجم الكلي</button>
+  <label>سعر الشراء من المورد (دج)</label>
+  <input type="number" id="purchasePrice" />
 
-  <div class="result" id="totalVolume"></div>
+  <label>تكلفة التغليف للوحدة (دج)</label>
+  <input type="number" id="packaging" />
+
+  <label>تكلفة النقل الداخلي الإجمالية (دج)</label>
+  <input type="number" id="transport" />
+
+  <label>تكاليف إضافية (دج)</label>
+  <input type="number" id="extras" />
+
+  <label>سعر البيع المتفق عليه (CAD)</label>
+  <input type="number" id="cadSalePrice" />
+
+  <label>سعر الصرف الرسمي (مثلاً 100)</label>
+  <input type="number" id="officialRate" value="100" />
+
+  <label>سعر الصرف الموازي (مثلاً 160)</label>
+  <input type="number" id="parallelRate" value="160" />
+
+  <button onclick="calculate()">احسب الربح</button>
+
+  <div class="result" id="results"></div>
 
   <script>
-    let products = [];
+    function calculate() {
+      const q = parseFloat(document.getElementById('quantity').value) || 0;
+      const purchase = parseFloat(document.getElementById('purchasePrice').value) || 0;
+      const pack = parseFloat(document.getElementById('packaging').value) || 0;
+      const transport = parseFloat(document.getElementById('transport').value) || 0;
+      const extras = parseFloat(document.getElementById('extras').value) || 0;
+      const cadPrice = parseFloat(document.getElementById('cadSalePrice').value) || 0;
+      const official = parseFloat(document.getElementById('officialRate').value) || 100;
+      const parallel = parseFloat(document.getElementById('parallelRate').value) || 160;
 
-    function addProduct() {
-      const name = document.getElementById('productName').value;
-      const brand = document.getElementById('brand').value;
-      const weight = parseFloat(document.getElementById('weight').value);
-      const volume = parseFloat(document.getElementById('volume').value);
+      const totalCostDZD = (purchase + pack) * q + transport + extras;
+      const unitCost = totalCostDZD / q;
+      const totalRevenueOfficial = cadPrice * q * official;
+      const totalRevenueParallel = cadPrice * q * parallel;
+      const profit = totalRevenueParallel - totalCostDZD;
+      const margin = profit / totalCostDZD * 100;
 
-      if (!name || !brand || !weight || !volume) {
-        alert('يرجى تعبئة جميع الحقول');
-        return;
-      }
-
-      const product = { name, brand, weight, volume };
-      products.push(product);
-      const option = document.createElement('option');
-      option.value = products.length - 1;
-      option.text = `${name} - ${brand}`;
-      document.getElementById('productList').appendChild(option);
-      alert('✅ تم إضافة المنتج بنجاح');
-    }
-
-    function calculateVolume() {
-      const index = document.getElementById('productList').value;
-      const quantity = parseFloat(document.getElementById('quantity').value);
-      if (index === "" || isNaN(quantity)) {
-        alert('يرجى اختيار منتج وإدخال الكمية');
-        return;
-      }
-
-      const product = products[index];
-      const totalVol = quantity * product.volume;
-      document.getElementById('totalVolume').textContent = `📦 الحجم الإجمالي التقريبي: ${totalVol.toLocaleString()} سم³`;
+      document.getElementById('results').innerHTML = `
+        ✅ التكلفة الإجمالية: ${totalCostDZD.toLocaleString()} دج<br/>
+        ✅ تكلفة الوحدة: ${unitCost.toFixed(2)} دج<br/>
+        💰 العائد (حسب الصرف الرسمي): ${totalRevenueOfficial.toLocaleString()} دج<br/>
+        💰 العائد (حسب الصرف الموازي): ${totalRevenueParallel.toLocaleString()} دج<br/>
+        📈 الربح الحقيقي: ${profit.toLocaleString()} دج<br/>
+        📊 هامش الربح: ${margin.toFixed(2)}%
+      `;
     }
   </script>
 </body>
