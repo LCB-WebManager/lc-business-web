@@ -1,24 +1,80 @@
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LC Business Web Manager</title>
-  </head>
-  <body style="font-family: sans-serif; direction: rtl; padding: 2rem;">
-    <h1>مرحبًا بك في LC Business Web Manager</h1>
-    <p>هذه هي النسخة التجريبية الأولى من التطبيق السحابي.</p>
-    <form>
-      <label>اسم الزبون:</label><br />
-      <input type="text" /><br /><br />
-      <label>اسم المنتج:</label><br />
-      <input type="text" /><br /><br />
-      <label>الكمية:</label><br />
-      <input type="number" /><br /><br />
-      <label>السعر لكل وحدة (دج):</label><br />
-      <input type="number" /><br /><br />
-      <button type="submit">تسجيل الصفقة</button>
-    </form>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LC Business Web Manager - المنتجات</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; direction: rtl; }
+    input, select, button { margin-bottom: 1rem; display: block; width: 100%; padding: 0.5rem; }
+    .result { font-weight: bold; margin-top: 1rem; color: green; }
+  </style>
+</head>
+<body>
+  <h1>LC Business Web Manager</h1>
+  <h2>📦 إضافة منتج</h2>
+
+  <label>اسم المنتج</label>
+  <input type="text" id="productName" />
+
+  <label>العلامة التجارية</label>
+  <input type="text" id="brand" />
+
+  <label>الوزن (غرام)</label>
+  <input type="number" id="weight" />
+
+  <label>الحجم (سم³)</label>
+  <input type="number" id="volume" />
+
+  <button onclick="addProduct()">➕ أضف المنتج</button>
+
+  <h2>📝 إدخال صفقة</h2>
+  <label>اختر المنتج</label>
+  <select id="productList"></select>
+
+  <label>الكمية</label>
+  <input type="number" id="quantity" />
+
+  <button onclick="calculateVolume()">📦 حساب الحجم الكلي</button>
+
+  <div class="result" id="totalVolume"></div>
+
+  <script>
+    let products = [];
+
+    function addProduct() {
+      const name = document.getElementById('productName').value;
+      const brand = document.getElementById('brand').value;
+      const weight = parseFloat(document.getElementById('weight').value);
+      const volume = parseFloat(document.getElementById('volume').value);
+
+      if (!name || !brand || !weight || !volume) {
+        alert('يرجى تعبئة جميع الحقول');
+        return;
+      }
+
+      const product = { name, brand, weight, volume };
+      products.push(product);
+      const option = document.createElement('option');
+      option.value = products.length - 1;
+      option.text = `${name} - ${brand}`;
+      document.getElementById('productList').appendChild(option);
+      alert('✅ تم إضافة المنتج بنجاح');
+    }
+
+    function calculateVolume() {
+      const index = document.getElementById('productList').value;
+      const quantity = parseFloat(document.getElementById('quantity').value);
+      if (index === "" || isNaN(quantity)) {
+        alert('يرجى اختيار منتج وإدخال الكمية');
+        return;
+      }
+
+      const product = products[index];
+      const totalVol = quantity * product.volume;
+      document.getElementById('totalVolume').textContent = `📦 الحجم الإجمالي التقريبي: ${totalVol.toLocaleString()} سم³`;
+    }
+  </script>
+</body>
 </html>
